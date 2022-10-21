@@ -4,6 +4,7 @@ const router = express.Router();
 const customerSQL = require("../sql/customer");
 const jwt = require("jsonwebtoken");
 
+// tương tự bill
 const checkToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   try {

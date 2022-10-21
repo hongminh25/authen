@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 
+// bảo mật - chuyển sang env
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",

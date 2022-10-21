@@ -1,9 +1,11 @@
+// không để dashboard đổi sang đúng tên
 const express = require("express");
 const dbconnect = require("../config/dbconnect");
 const router = express.Router();
 const dashboardSQL = require("../sql/dashboard");
 const jwt = require("jsonwebtoken");
 
+// tương tự bill 
 const checkToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   try {

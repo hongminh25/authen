@@ -5,6 +5,8 @@ const signinSQL = require("../sql/signin");
 const jwt = require("jsonwebtoken");
 const { isEmpty } = require("../utils/validate");
 
+// không tách riêng ra gộp chung vào nhân viên
+
 router.post("/", (req, res) => {
   try {
     const { phoneNumber, password } = req.body;
@@ -24,7 +26,7 @@ router.post("/", (req, res) => {
       }
     });
   } catch (err) {
-    console.log(err);
+    console.log(err); // không console.log() bắn lỗi về client
   }
 });
 

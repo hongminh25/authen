@@ -3,7 +3,7 @@ const searchService = (tendichvu, giadichvu) => {
 
   if (tendichvu) {
     condition += `where dich_vu.tendichvu = '${tendichvu}'`;
-  }
+  } // chỉ 1 tác vụ trong if thì có thể bỏ block {}
   if (giadichvu) {
     condition += `ORDER BY giadichvu ${giadichvu}`;
   }

@@ -4,36 +4,43 @@ const dbconnect = require("../config/dbconnect");
 const router = express.Router();
 const billSQL = require("../sql/bill");
 
+// dùng chung - chuyển sang utils
 const query = (sql) =>
   new Promise((resolve, reject) => {
-    dbconnect.query(sql, (error, result) => {
-      if (error) reject(error);
-      resolve(result);
-    });
+    try {
+      dbconnect.query(sql, (error, result) => {
+        if (error) reject(error);
+        resolve(result);
+      });
+    } catch (error) {
+      reject(error)
+    }
   });
 
+  // dùng chung - chuyển sáng utils
 const checkToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   try {
-    if (authHeader) {
+    if (authHeader) { // điều kiện sai nếu authHeader không phải là 1 chuỗi sẽ chết server
       const token = authHeader.split(" ")[1];
-      jwt.verify(token, "111111", (err, data) => {
+      jwt.verify(token, "111111" , (err, data) => { // private key lấy từ 1 nguồn khác không phải điền trực tiếp
         if (err) throw err;
         req.id = data.id;
         next();
       });
     } else {
-      res.send({ error_code: 498, error_msg: "Token invalid" });
+      res.send({ error_code: 498, message: "Token invalid" });
     }
   } catch (error) {
-    res.send({ error_code: 498, error_msg: "Token invalid" });
+    res.send({ error_code: 498, message: "Token invalid" });
   }
 };
 
-router.get("/", checkToken, async (req, res) => {
+router.get("/", checkToken, async (req, res) => { // không để / để 1 router cụ thể ví dụ: /add
   const { trangthaidonID, khachhangID, ngaythanhtoan, ngaynhanhang } =
     req.query;
 
+    // chưa có try catch query đến api lỗi sẽ chết server
   let data = [];
 
   const bill = await query(
@@ -45,13 +52,13 @@ router.get("/", checkToken, async (req, res) => {
       billSQL.searchBillDetail(element.hoa_don_id)
     );
     for (const ele of billDetail) {
-      let price = ele.soluong * ele.giadichvu;
-      element.tongtien += price;
+      let price = ele.soluong * ele.giadichvu; 
+      element.tongtien += price; // nếu tổng tiền đang null hoặc undefined sẽ lỗi
     }
     data = [...data, { ...element, hdct: billDetail }];
   }
 
-  res.send(data);
+  res.send(data); // error_code = 0, data = data, message = null
 });
 
 router.post("/", checkToken, (req, res) => {
@@ -60,16 +67,19 @@ router.post("/", checkToken, (req, res) => {
     ngaytrahang,
     trangthaidonID,
     khachhangID,
-    ngaythanhtoan,
+    ngaythanhtoan, // không dùng bỏ đi
     listBillDetail,
   } = req.body;
 
+  // validate dữ liệu yêu cầu trường nào phải có thì mới được thêm hóa đơn
+
+  // chuyển sang dùng hàm query dựng sẵn
   dbconnect.query(
     billSQL.insertBill,
     {
       trangthaidonID,
       khachhangID,
-      ngaythanhtoan: null,
+      ngaythanhtoan: null, // không điền đặt cột trong db nullable sẽ tự sinh ra null không cần thêm vào
       ngaynhanhang,
       ngaytrahang,
       nhanvienID: req.id,
@@ -83,11 +93,12 @@ router.post("/", checkToken, (req, res) => {
           hoadonID: result.insertId,
         });
       }
-      res.send(result);
+      res.send(result); // error_code = 0, data = null, message = Thêm thành công hoặc Add success
     }
   );
 });
 
+// tương tự
 router.put("/:id", checkToken, (req, res) => {
   const {
     trangthaidonID,
